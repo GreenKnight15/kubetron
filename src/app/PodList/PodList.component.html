@@ -1,0 +1,45 @@
+<div fxLayout="row" fxLayoutAlign="start start" fxFlex="40">
+<mat-list fxFill fxFlex fxLayout="column" fxLayoutAlign="start start" >
+  <mat-list-item fxFlex fxFill  fxLayout="column" fxLayoutAlign="start none"  fxLayoutGap="10px" *ngFor="let pod of pods">
+    <mat-card *ngIf="pods" fxFill fxLayoutGap="10px">
+
+      <mat-card-header>
+        <mat-card-title>
+          {{pod.metadata.name}}
+        </mat-card-title>
+        <mat-card-subtitle>
+            {{pod.status.phase}}
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <p>
+          Namespaces: {{pod.metadata.namespace}}
+        </p>
+        <ul>
+          <li *ngFor="let label of pod.metadata.labels | keyvalue">
+              {{label.key}}:{{label.value}}
+          </li>
+        </ul>
+        <p>
+          Annotations: {{pod.metadata.annotations}}
+        </p>
+      </mat-card-content>
+      <mat-card-actions>
+          <button mat-button >KILL</button>
+          <!-- <button mat-button [routerLink]="['/pod', pod.metadata.uid]">Details</button> -->
+          <button mat-button (click)="onSelect(pod)">Details</button>
+      </mat-card-actions>
+    </mat-card>
+  </mat-list-item>
+</mat-list>
+</div>
+<mat-card *ngIf="pods && pods.length == 0" fxFill >
+    <mat-card-header>
+      <mat-card-title>
+        No pods found
+      </mat-card-title>
+    </mat-card-header>
+  </mat-card>
+<mat-divider fxLayoutGap="10" [vertical]="true" fxLayout="row" fxLayoutAlign="start start" ></mat-divider>
+<app-pod-details fxFlex fxFill fxLayout="row" fxLayoutAlign="start start" [pod]="selectedPod"></app-pod-details>

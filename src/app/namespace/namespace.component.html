@@ -1,0 +1,9 @@
+<mat-list>
+    <h3 mat-subheader>Kinds</h3>
+    <mat-list-item *ngFor="let kind of kinds">
+      <h3 mat-line>{{kind.kind}}</h3>
+      <mat-card-actions>
+        <a mat-button [routerLink]="['list',kind.route]" routerLinkActive="router-link-active" >Details</a>
+      </mat-card-actions>
+    </mat-list-item>
+</mat-list>

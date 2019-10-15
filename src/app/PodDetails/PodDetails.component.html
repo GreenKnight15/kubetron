@@ -1,0 +1,26 @@
+<div *ngIf="pod" class="pod-details" fxLayoutGap="10">
+<mat-card>
+  <mat-card-title-group>
+      <mat-card-title>
+          {{ pod.metadata.name }}
+      </mat-card-title>
+      <mat-card-subtitle>
+          {{pod.metadata.uid}}
+      </mat-card-subtitle>
+  </mat-card-title-group>
+  <mat-tab-group dynamicHeight="true" >
+      <mat-tab label="Spec">
+        <p>{{pod.spec | json}}</p>
+      </mat-tab>
+      <mat-tab label="Containers">
+          <mat-list>
+              <mat-list-item *ngFor="let con of pod.spec.containers" >
+                  <mat-card-content>
+                    Name: {{con.name}}
+                  </mat-card-content>
+              </mat-list-item>
+          </mat-list>
+      </mat-tab>
+    </mat-tab-group>
+</mat-card>
+</div>
