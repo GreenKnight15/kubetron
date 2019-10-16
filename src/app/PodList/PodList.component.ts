@@ -1,5 +1,4 @@
 import { Component, OnInit, Input, OnChanges } from '@angular/core';
-import { ConfigService } from '../services/config.service';
 import { retry } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { V1PodList } from '../../../server/node_modules/@kubernetes/client-node/dist/gen/model/V1PodList';
@@ -15,7 +14,7 @@ export class PodListComponent implements OnInit, OnChanges {
 
   selectedNamespace;
 
-  constructor(private configService: ConfigService, private http: HttpClient, private router: Router, private route: ActivatedRoute) {
+  constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute) {
     this.setNamespace();
   }
 
@@ -41,7 +40,7 @@ export class PodListComponent implements OnInit, OnChanges {
     let httpParams = new HttpParams();
     httpParams = httpParams.append('namespace', namespace);
 
-    return this.http.get('http://localhost:3000/pod/'+namespace, ).pipe(
+    return this.http.get('http://localhost:3000/' + namespace + '/list/pod' ).pipe(
       retry(3), // retry a failed request up to 3 times
     );
   }
