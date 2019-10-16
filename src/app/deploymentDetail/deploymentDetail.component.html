@@ -1,0 +1,55 @@
+<mat-card fxFill fxFlex *ngIf="deployment" fxLayoutGap="10px">
+  <mat-card-header>
+    <mat-card-title>
+      {{deployment.metadata.name}}
+    </mat-card-title>
+    <mat-card-subtitle>
+      {{deployment.metadata.selfLink}}
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+
+  <mat-list role="list">
+    <h3 matLine matSubheader>Labels</h3>
+    <mat-list-item role="listitem" *ngFor="let label of deployment.metadata.labels | keyvalue" >
+        <p matLine >{{label.key}}:{{label.value}}</p>
+    </mat-list-item>
+    <mat-divider></mat-divider>
+    <h3 matLine  matSubheader>Annotations</h3>
+    <mat-list-item  *ngFor="let ann of deployment.metadata.annotations | keyvalue" >
+        <p matLine >{{ann.key}}:{{ann.value}}</p>
+    </mat-list-item>
+  </mat-list>
+
+  <mat-tab label="Containers">
+    <mat-list>
+      <mat-list-item *ngFor="let con of deployment.spec.template.spec.containers" >
+        <mat-card-content>
+          Name: {{con.name}}
+        </mat-card-content>
+      </mat-list-item>
+    </mat-list>
+  </mat-tab>
+
+    <mat-accordion>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            Spec
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <p>{{deployment.spec | json}}</p>
+      </mat-expansion-panel>
+      <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              Pod Spec
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <p>{{deployment.spec.template.spec | json}}</p>
+        </mat-expansion-panel>
+    </mat-accordion>
+
+  </mat-card-content>
+</mat-card>

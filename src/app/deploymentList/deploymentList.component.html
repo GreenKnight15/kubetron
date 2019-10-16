@@ -1,0 +1,30 @@
+<mat-list >
+  <mat-list-item *ngFor="let deploy of deployments"  fxFill fxLayout="column" fxLayoutAlign="start none"  fxLayoutGap="10px">
+      <mat-card *ngIf="deployments" fxFill fxFlex>
+
+        <mat-card-header>
+          <mat-card-title>
+            {{deploy.metadata.name}}
+          </mat-card-title>
+          <mat-card-subtitle>
+            {{deploy.status.replicas}}/{{deploy.status.readyReplicas}}
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+
+        </mat-card-content>
+        <mat-card-actions>
+          <a mat-button [routerLink]="[deploy.metadata.name]" routerLinkActive="router-link-active" [state]="deploy" >Details</a>
+        </mat-card-actions>
+        </mat-card>
+  </mat-list-item>
+</mat-list>
+
+<mat-card *ngIf="deployments && deployments.length == 0" fxFill >
+    <mat-card-header>
+      <mat-card-title>
+        No deployments found
+      </mat-card-title>
+    </mat-card-header>
+  </mat-card>

@@ -21,6 +21,7 @@ export class AppComponent implements OnDestroy, OnInit {
   selectedNamespaceName: string;
   private mobileQueryListener: () => void;
 
+  // tslint:disable-next-line: max-line-length
   constructor(changeDetectorRef: ChangeDetectorRef, media: MediaMatcher, private router: Router, private http: HttpClient, private route: ActivatedRoute) {
     this.mobileQuery = media.matchMedia('(max-width: 600px)');
     this.mobileQueryListener = () => changeDetectorRef.detectChanges();
@@ -41,13 +42,13 @@ export class AppComponent implements OnDestroy, OnInit {
   }
 
   getNamespaces() {
-    return this.http.get('http://localhost:3000/namespace').pipe(
+    return this.http.get('http://localhost:3000/namespace/list').pipe(
       retry(3), // retry a failed request up to 3 times
     );
   }
 
   goBack() {
-    this.router.navigate(['../'], { relativeTo: this.route });
+    this.router.navigate(['./'], { relativeTo: this.route });
   }
 
   onNamespaceSelect(namespace: V1Namespace) {

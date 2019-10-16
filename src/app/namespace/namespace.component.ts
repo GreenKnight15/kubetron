@@ -15,7 +15,7 @@ export class NamespaceComponent implements OnInit {
     {route: '', kind: 'Service'},
     {route: '', kind: 'Ingress'},
     {route: '', kind: 'StatefulSet'},
-    {route: 'deploy', kind: 'Deployment'}
+    {route: 'deployment', kind: 'Deployment'}
    ];
 
   constructor(private router: Router, private route: ActivatedRoute) { }

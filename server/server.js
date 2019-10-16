@@ -3,6 +3,7 @@ const k8s = require('@kubernetes/client-node');
 const kc = new k8s.KubeConfig();
 kc.loadFromDefault();
 const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
+const k8sBetaApi = kc.makeApiClient(k8s.AppsV1beta1Api);
 
 var app = express();
 
@@ -16,15 +17,39 @@ app.listen(PORT, function() {
     console.log('Server is running on PORT:',PORT);
 });
 
-app.get('/pod/:namespace', function(req, res) {
+app.get('/:namespace/list/pod/', function(req, res) {
   var namespace = req.params.namespace
-  k8sApi.listNamespacedPod(namespace).then((response) => {
+  k8sApi.listNamespacedPod(namespace,'true').then((response) => {
     res.status(response.response.statusCode).send(response.body)
   });
 });
 
-app.get('/namespace', function(req, res) {
+app.get('/:namespace/list/deployment/', function(req, res) {
+  var namespace = req.params.namespace
+  k8sBetaApi.listNamespacedDeployment(namespace,'true').then((response) => {
+    res.status(response.response.statusCode).send(response.body)
+  });
+});
+
+app.get('/:namespace/deployment/:name', function(req, res) {
+  var namespace = req.params.namespace
+  var name = req.params.name
+  k8sBetaApi.readNamespacedDeployment(name,namespace,'true').then((response) => {
+    res.status(response.response.statusCode).send(response.body)
+  });
+});
+
+app.get('/:namespace/deployment/status/:name', function(req, res) {
+  var namespace = req.params.namespace
+  var name = req.params.name
+  k8sBetaApi.readNamespacedDeploymentStatus(name,namespace,'true').then((response) => {
+    res.status(response.response.statusCode).send(response.body)
+  });
+});
+
+app.get('/namespace/list', function(req, res) {
   k8sApi.listNamespace(true).then(response => {
     res.status(response.response.statusCode).send(response.body)
   })
 });
+
