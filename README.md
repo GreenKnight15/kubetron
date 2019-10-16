@@ -1,6 +1,6 @@
 # Kubetron
 
-![Screenshot of Kubetron](https://github.com/GreenKnight15/kubetron/assets/kubetron.png)
+<img src="assets/kubetron.png">
 
 ## Description
 The idea of kubetron is to create a cross platform stand alone k8s dashboard. The are many command line utilities but would like to bring more style with some easy of life functionality.
