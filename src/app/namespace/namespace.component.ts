@@ -12,9 +12,7 @@ export class NamespaceComponent implements OnInit {
 
   kinds = [
     {route: 'pod', kind: 'Pods'},
-    {route: '', kind: 'Service'},
-    {route: '', kind: 'Ingress'},
-    {route: '', kind: 'StatefulSet'},
+    {route: 'service', kind: 'Service'},
     {route: 'deployment', kind: 'Deployment'}
    ];
 
