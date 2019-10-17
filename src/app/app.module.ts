@@ -15,6 +15,7 @@ import { PodDetailsComponent } from './PodDetails/PodDetails.component';
 import { NamespaceComponent } from './namespace/namespace.component';
 import { DeploymentListComponent } from './deploymentList/deploymentList.component';
 import { DeploymentDetailComponent } from './deploymentDetail/deploymentDetail.component';
+import { ServiceListComponent } from './serviceList/serviceList.component';
 
 @NgModule({
    declarations: [
@@ -23,7 +24,8 @@ import { DeploymentDetailComponent } from './deploymentDetail/deploymentDetail.c
       PodDetailsComponent,
       NamespaceComponent,
       DeploymentListComponent,
-      DeploymentDetailComponent
+      DeploymentDetailComponent,
+      ServiceListComponent
    ],
    imports: [
       AppRoutingModule,

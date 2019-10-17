@@ -47,6 +47,13 @@ app.get('/:namespace/deployment/status/:name', function(req, res) {
   });
 });
 
+app.get('/:namespace/list/service/', function(req, res) {
+  var namespace = req.params.namespace
+  k8sApi.listNamespacedService(namespace,true,'true').then((response) => {
+    res.status(response.response.statusCode).send(response.body)
+  });
+});
+
 app.get('/namespace/list', function(req, res) {
   k8sApi.listNamespace(true).then(response => {
     res.status(response.response.statusCode).send(response.body)
