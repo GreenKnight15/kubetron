@@ -2,10 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import {MediaMatcher} from '@angular/cdk/layout';
 import {ChangeDetectorRef, OnDestroy} from '@angular/core';
 import { Router, ActivatedRoute, UrlTree, UrlSegmentGroup, UrlSegment, PRIMARY_OUTLET } from '@angular/router';
-import { retry } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
-import { V1NamespaceList } from '../../server/node_modules/@kubernetes/client-node/dist/gen/model/v1NamespaceList';
-import { V1Namespace } from '../../server/node_modules/@kubernetes/client-node/dist/gen/model/v1Namespace';
+import { V1Namespace, V1NamespaceList } from '@kubernetes/client-node';
+import { ElectronService } from './services/electron.service';
 
 @Component({
   selector: 'app-root',
@@ -22,29 +21,25 @@ export class AppComponent implements OnDestroy, OnInit {
   private mobileQueryListener: () => void;
 
   // tslint:disable-next-line: max-line-length
-  constructor(changeDetectorRef: ChangeDetectorRef, media: MediaMatcher, private router: Router, private http: HttpClient, private route: ActivatedRoute) {
+  constructor(changeDetectorRef: ChangeDetectorRef, media: MediaMatcher, private router: Router, private http: HttpClient, private route: ActivatedRoute, private readonly _ipc: ElectronService) {
     this.mobileQuery = media.matchMedia('(max-width: 600px)');
     this.mobileQueryListener = () => changeDetectorRef.detectChanges();
     this.mobileQuery.addListener(this.mobileQueryListener);
+
+    this._ipc.on('getNamespaces-res', (event, arg: V1NamespaceList) => {
+      console.log('recived namespaces')
+      this.namespaces = arg.items;
+      this.selectedNamespace = arg.items[0];
+    });
+    this._ipc.send('getNamespaces-req');
   }
 
   ngOnInit()  {
-    this.getNamespaces().subscribe((res: V1NamespaceList) => {
-      this.namespaces = res.items;
-      console.log(this.namespaces);
-      this.selectedNamespace = res.items[0];
-      this.menuItem.push({path: 'pod', text: 'Pods', namespace: this.selectedNamespace.metadata.name});
-    });
+    this.menuItem.push({path: 'pod', text: 'Pods', namespace: this.selectedNamespace.metadata.name});
   }
 
   ngOnDestroy(): void {
     this.mobileQuery.removeListener(this.mobileQueryListener);
-  }
-
-  getNamespaces() {
-    return this.http.get('http://localhost:3000/namespace/list').pipe(
-      retry(3), // retry a failed request up to 3 times
-    );
   }
 
   goBack() {
@@ -52,13 +47,11 @@ export class AppComponent implements OnDestroy, OnInit {
   }
 
   onNamespaceSelect(namespace: V1Namespace) {
-    console.log(namespace);
-    console.log(this.router.url);
     const tree: UrlTree = this.router.parseUrl(this.router.url);
     const g: UrlSegmentGroup = tree.root.children[PRIMARY_OUTLET];
     const s: UrlSegment[] = g.segments;
-    this.selectedNamespaceName = s[0].path; // returns 'team'
-    // s[0].parameters; // returns {id: 33}
+    this.selectedNamespaceName = s[0].path;
+    // s[0].parameters;
     const redirectNamespace = this.router.url.replace(this.selectedNamespaceName, namespace.metadata.name);
     this.router.navigateByUrl(redirectNamespace);
   }

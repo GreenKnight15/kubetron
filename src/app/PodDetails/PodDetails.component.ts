@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { V1Pod } from '../../../server/node_modules/@kubernetes/client-node/dist/gen/model/V1Pod';
+import { V1Pod } from '@kubernetes/client-node';
 
 @Component({
   selector: 'app-pod-details',

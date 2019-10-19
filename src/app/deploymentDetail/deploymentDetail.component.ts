@@ -1,10 +1,7 @@
-import { Component, OnInit, Input } from '@angular/core';
-// tslint:disable-next-line: max-line-length
-import { AppsV1beta1Deployment  } from '../../../server/node_modules/@kubernetes/client-node/dist/gen/model/AppsV1beta1Deployment';
-import { ActivatedRoute, NavigationStart, Router, PRIMARY_OUTLET, UrlTree, UrlSegmentGroup, UrlSegment } from '@angular/router';
-import { Observable } from 'rxjs';
-import { map, filter, retry } from 'rxjs/operators';
-import { HttpParams, HttpClient } from '@angular/common/http';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { AppsV1beta1Deployment  } from '@kubernetes/client-node';
+import { Router, PRIMARY_OUTLET, UrlTree, UrlSegmentGroup, UrlSegment } from '@angular/router';
+import { DeploymentService } from '../services/deployment.service';
 
 @Component({
   selector: 'app-deploymentetail',
@@ -17,44 +14,35 @@ export class DeploymentDetailComponent implements OnInit {
   deploymentStatus: AppsV1beta1Deployment;
   selectedNamespace: string;
   deploymentName;
+  deploymentSubscription$;
 
-  constructor(private http: HttpClient, private router: Router) { }
-
-  ngOnInit(): void  {
-    this.setNamespace();
-    this.setDeployment(this.selectedNamespace, this.deploymentName);
-  }
-
-  ngOnChanges(): void {
-    this.setDeployment(this.selectedNamespace, this.deploymentName);
-  }
-
-  setDeployment(namespace: string, name: string) {
-    this.getDeployment(namespace, name).subscribe((res: AppsV1beta1Deployment) => {
-      console.log(res);
-      this.deployment = res;
+  constructor(private router: Router, private deploymentService: DeploymentService, private cdr: ChangeDetectorRef) {
+    this.deploymentSubscription$ = this.deploymentService.deployment.subscribe((value) => {
+      this.deployment = value;
+      this.cdr.detectChanges();
     });
   }
 
-  getDeployment(namespace: string, name: string) {
-    return this.http.get('http://localhost:3000/' + namespace + '/deployment/' + name ).pipe(
-      retry(3), // retry a failed request up to 3 times
-    );
+  ngOnInit(): void  {
+    this.setNamespace();
+    this.requestDeployment(this.selectedNamespace, this.deploymentName);
   }
 
-  getDeploymentStatus(namespace: string, name: string) {
-    return this.http.get('http://localhost:3000/' + namespace + '/deployment/status/' + name ).pipe(
-      retry(3), // retry a failed request up to 3 times
-    );
+  requestDeployment(namespace: string, name: string) {
+    this.deploymentService.getNamespacedDeploymentByName(namespace, name);
+  }
+
+  ngOnDestroy(): void {
+    this.cdr.detach();
+    this.deploymentSubscription$.unsubscribe();
   }
 
   setNamespace() {
     const tree: UrlTree = this.router.parseUrl(this.router.url);
     const g: UrlSegmentGroup = tree.root.children[PRIMARY_OUTLET];
     const s: UrlSegment[] = g.segments;
-    this.selectedNamespace = s[0].path; // returns 'team'
+    this.selectedNamespace = s[0].path;
     this.deploymentName = s[3].path;
-    // s[0].parameters; // returns {id: 33}
   }
 
 

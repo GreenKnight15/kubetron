@@ -1,8 +1,5 @@
 import { Component, OnInit, OnChanges } from '@angular/core';
-// tslint:disable-next-line: max-line-length
-import { V1Service  } from '../../../server/node_modules/@kubernetes/client-node/dist/gen/model/v1Service';
-// tslint:disable-next-line: max-line-length
-import { V1ServiceList } from '../../../server/node_modules/@kubernetes/client-node/dist/gen/model/v1ServiceList';
+import { V1Service, V1ServiceList } from '@kubernetes/client-node';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Router, UrlTree, UrlSegmentGroup, UrlSegment, PRIMARY_OUTLET } from '@angular/router';
 import { retry } from 'rxjs/operators';
