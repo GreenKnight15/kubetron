@@ -1,48 +1,59 @@
-import { Component, OnInit, Input, OnChanges } from '@angular/core';
-import { retry } from 'rxjs/operators';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { V1PodList } from '../../../server/node_modules/@kubernetes/client-node/dist/gen/model/V1PodList';
-import { V1Pod } from '../../../server/node_modules/@kubernetes/client-node/dist/gen/model/V1Pod';
-import { Router, ActivatedRoute, UrlTree, UrlSegmentGroup, UrlSegment, PRIMARY_OUTLET } from '@angular/router';
+import { Component, OnInit, OnChanges, OnDestroy, ChangeDetectorRef  } from '@angular/core';
+import { V1Pod } from '@kubernetes/client-node/dist/gen/model/V1Pod';
+import { Router, UrlTree, UrlSegmentGroup, UrlSegment, PRIMARY_OUTLET } from '@angular/router';
+import { PodService } from '../services/pod.service';
+import { NavService } from '../services/nav.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-pod-list',
-  templateUrl: './PodList.component.html',
-  styleUrls: ['./PodList.component.css']
+  templateUrl: './podList.component.html',
+  styleUrls: ['./podList.component.css']
 })
-export class PodListComponent implements OnInit, OnChanges {
+export class PodListComponent implements OnInit, OnChanges, OnDestroy {
 
   selectedNamespace;
-
-  constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute) {
-    this.setNamespace();
-  }
-
   pods: V1Pod[];
   selectedPod: V1Pod;
+  podsSubscription$: Subscription;
+  selectedNamespace$: Subscription;
+
+  constructor(
+    private router: Router,
+    private podService: PodService,
+    private cdr: ChangeDetectorRef,
+    // tslint:disable-next-line: variable-name
+    private readonly _navService: NavService
+    ) {
+      this.selectedNamespace$ = this._navService.selectedNamespace$.subscribe((value) => {
+        this.selectedNamespace = value;
+      });
+      console.log(this.selectedNamespace);
+    }
 
   ngOnInit(): void  {
     console.log(this.selectedNamespace);
-    this.setPods(this.selectedNamespace);
+
+    this.podsSubscription$ = this.podService.pods.subscribe((value) => {
+      console.log('pod list recived');
+      this.pods = value;
+      this.cdr.detectChanges();
+    });
+    this.requestPods(this.selectedNamespace);
+  }
+
+  requestPods(namespace: string) {
+    this.podService.getGetNamespacedPods(namespace);
+  }
+
+  ngOnDestroy(): void {
+    this.cdr.detach();
+    this.selectedNamespace$.unsubscribe();
+    this.podsSubscription$.unsubscribe();
   }
 
   ngOnChanges(): void {
-    this.setPods(this.selectedNamespace);
-  }
 
-  setPods(namespace: string) {
-    this.getPods(namespace).subscribe((res: V1PodList) => {
-      this.pods = res.items;
-    });
-  }
-
-  getPods(namespace: string) {
-    let httpParams = new HttpParams();
-    httpParams = httpParams.append('namespace', namespace);
-
-    return this.http.get('http://localhost:3000/' + namespace + '/list/pod' ).pipe(
-      retry(3), // retry a failed request up to 3 times
-    );
   }
 
   onSelect(pod: V1Pod): void {
@@ -54,7 +65,6 @@ export class PodListComponent implements OnInit, OnChanges {
     const tree: UrlTree = this.router.parseUrl(this.router.url);
     const g: UrlSegmentGroup = tree.root.children[PRIMARY_OUTLET];
     const s: UrlSegment[] = g.segments;
-    this.selectedNamespace = s[0].path; // returns 'team'
-    // s[0].parameters; // returns {id: 33}
+    this.selectedNamespace = s[0].path;
   }
 }

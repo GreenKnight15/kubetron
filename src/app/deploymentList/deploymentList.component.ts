@@ -1,57 +1,64 @@
-import { Component, OnInit, OnChanges } from '@angular/core';
-// tslint:disable-next-line: max-line-length
-import { AppsV1beta1Deployment  } from '../../../server/node_modules/@kubernetes/client-node/dist/gen/model/AppsV1beta1Deployment';
-// tslint:disable-next-line: max-line-length
-import { AppsV1beta1DeploymentList } from '../../../server/node_modules/@kubernetes/client-node/dist/gen/model/AppsV1beta1DeploymentList';
-import { HttpParams, HttpClient } from '@angular/common/http';
-import { retry } from 'rxjs/operators';
-import { UrlTree, UrlSegmentGroup, UrlSegment, PRIMARY_OUTLET, Router } from '@angular/router';
+import { Component, OnInit, OnChanges, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { AppsV1beta1Deployment } from '@kubernetes/client-node/dist/gen/model/AppsV1beta1Deployment';
+import { UrlTree, UrlSegmentGroup, UrlSegment, PRIMARY_OUTLET, Router, NavigationEnd } from '@angular/router';
+import { DeploymentService } from '../services/deployment.service';
+import { NavService } from '../services/nav.service';
+import { Observable, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-deployment-list',
   templateUrl: './deploymentList.component.html',
   styleUrls: ['./deploymentList.component.css']
 })
-export class DeploymentListComponent implements OnInit, OnChanges {
+export class DeploymentListComponent implements OnInit, OnChanges, OnDestroy {
 
   selectedNamespace;
-  deployments: AppsV1beta1Deployment[];
-  selectedDeployment: AppsV1beta1Deployment;
+  deployments: AppsV1beta1Deployment[] = [];
+  selectedDeployment: AppsV1beta1Deployment = {};
+  deploymentSubscription$: Subscription;
+  selectedNamespace$: Subscription;
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(
+    private router: Router,
+    private deploymentService: DeploymentService,
+    private cdr: ChangeDetectorRef,
+    // tslint:disable-next-line: variable-name
+    private readonly _navService: NavService
+    ) {
 
-  ngOnInit(): void  {
-    console.log(this.selectedNamespace);
-    this.setNamespace();
-    this.setDeployments(this.selectedNamespace);
-  }
+    }
+
+    ngOnInit(): void  {
+      this.selectedNamespace$ = this._navService.selectedNamespace$.subscribe((value) => {
+        this.selectedNamespace = value;
+      });
+
+      console.log(this.selectedNamespace);
+      this.requestDeployments(this.selectedNamespace);
+      this.deploymentSubscription$ = this.deploymentService.deployments.subscribe((value: AppsV1beta1Deployment[])  => {
+        this.deployments = value;
+        this.cdr.detectChanges();
+      });
+    }
 
   ngOnChanges(): void {
-    this.setNamespace();
-    this.setDeployments(this.selectedNamespace);
+    // this.setNamespace();
   }
 
-  setDeployments(namespace: string) {
-    this.getDeployments(namespace).subscribe((res: AppsV1beta1DeploymentList) => {
-      console.log(res.items);
-      this.deployments = res.items;
-    });
+  requestDeployments(namespace: string) {
+    this.deploymentService.getNamespacedDeployments(namespace);
   }
 
-  getDeployments(namespace: string) {
-    let httpParams = new HttpParams();
-    httpParams = httpParams.append('namespace', namespace);
-
-    return this.http.get('http://localhost:3000/' + namespace + '/list/deployment' ).pipe(
-      retry(3), // retry a failed request up to 3 times
-    );
+  ngOnDestroy(): void {
+    this.cdr.detach();
+    this.deploymentSubscription$.unsubscribe();
+    this.selectedNamespace$.unsubscribe();
   }
 
   setNamespace() {
     const tree: UrlTree = this.router.parseUrl(this.router.url);
     const g: UrlSegmentGroup = tree.root.children[PRIMARY_OUTLET];
     const s: UrlSegment[] = g.segments;
-    this.selectedNamespace = s[0].path; // returns 'team'
-    // s[0].parameters; // returns {id: 33}
+    this.selectedNamespace = s[0].path;
   }
 }

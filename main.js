@@ -1,9 +1,11 @@
-const { app, BrowserWindow, Menu } = require("electron");
+const { app, BrowserWindow, Menu, ipcMain  } = require("electron");
 const path = require("path");
 const url = require("url");
-const { fork } = require('child_process')
-// Start node server
-const ps = fork(`${__dirname}/server/server.js`)
+const k8s = require('@kubernetes/client-node');
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
+const k8sBetaApi = kc.makeApiClient(k8s.AppsV1beta1Api);
 
 // Path to index.html
 const indexPath = path.join(__dirname, `/dist/index.html`);
@@ -12,10 +14,69 @@ let mainWindow
 
 app.on('ready', createWindow)
 
+// Get Namespaces List
+ipcMain.on('getNamespacesListRequest', (event) => {
+  console.log("Getting namespaces")
+  k8sApi.listNamespace(true).then(response => {
+    event.reply('getNamespacesListResponse', response.body)
+  });
+});
+
+// Get Pod List
+ipcMain.on('getPodListRequest',(event, ...args) => {
+  console.log('getPodListRequest received');
+  var namespace = args[0]
+  console.log("Get pod list for namespace " + namespace)
+  k8sApi.listNamespacedPod(namespace,'true').then((response) => {
+    event.reply('getPodListResponse',response.body.items);
+  });
+});
+
+// Get Deployment List
+ipcMain.on('getDeploymentListRequest',(event, ...args) => {
+  console.log('getDeploymentListRequest received '+args);
+  var namespace = args[0]
+  console.log("Get deployment list for namespace " + namespace)
+  k8sBetaApi.listNamespacedDeployment(namespace,'true').then((response) => {
+    event.reply('getDeploymentListResponse', response.body.items);
+  });
+});
+
+// Get Deployment by name
+ipcMain.on('getNamespacedDeploymentByNameRequest',(event, ...args) => {
+  console.log('getNamespacedDeploymentByNameRequest received');
+
+  var namespace = args[1]
+  console.log(namespace)
+  var name = args[0]
+  console.log(name)
+  console.log("Get deployment " + name +" for namespace " + namespace)
+  try {
+    k8sBetaApi.readNamespacedDeployment(name, namespace, 'true').then((response) => {
+      event.reply('getNamespacedDeploymentByNameResponse', response.body);
+    });
+  } catch(e) {
+    console.log(e.meesgae)
+  }
+});
+
+// Get Service List
+ipcMain.on('getServiceListRequest',(event, ...args) => {
+  console.log('getServiceListRequest received '+args);
+  var namespace = args[0]
+  console.log("Get service list for namespace " + namespace)
+  k8sApi.listNamespacedService(namespace,'true').then((response) => {
+    event.reply('getServiceListResponse', response.body.items);
+  });
+});
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 800,
-    height: 600
+    height: 600,
+    webPreferences: {
+      nodeIntegration: true
+    }
   });
   // load the dist folder from Angular
   mainWindow.loadURL(

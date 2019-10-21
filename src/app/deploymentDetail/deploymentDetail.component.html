@@ -1,4 +1,4 @@
-<mat-card fxFill fxFlex *ngIf="deployment" fxLayoutGap="10px">
+<mat-card fxFill fxFlex *ngIf="deploymentSubscription$ | async as deployment;" fxLayoutGap="10px">
   <mat-card-header>
     <mat-card-title>
       {{deployment.metadata.name}}

@@ -1,17 +1,17 @@
-import { Component, OnInit } from '@angular/core';
-import {MediaMatcher} from '@angular/cdk/layout';
-import {ChangeDetectorRef, OnDestroy} from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy  } from '@angular/core';
+import { MediaMatcher } from '@angular/cdk/layout';
 import { Router, ActivatedRoute, UrlTree, UrlSegmentGroup, UrlSegment, PRIMARY_OUTLET } from '@angular/router';
-import { retry } from 'rxjs/operators';
-import { HttpClient } from '@angular/common/http';
-import { V1NamespaceList } from '../../server/node_modules/@kubernetes/client-node/dist/gen/model/v1NamespaceList';
-import { V1Namespace } from '../../server/node_modules/@kubernetes/client-node/dist/gen/model/v1Namespace';
+import { ElectronService } from 'ngx-electron';
+import { V1Namespace } from '@kubernetes/client-node/dist/gen/model/V1Namespace';
+import { V1NamespaceList } from '@kubernetes/client-node/dist/gen/model/V1NamespaceList';
+import { NavService } from './services/nav.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
+
 export class AppComponent implements OnDestroy, OnInit {
   title = 'kubetron';
   mobileQuery: MediaQueryList;
@@ -19,47 +19,53 @@ export class AppComponent implements OnDestroy, OnInit {
   selectedNamespace: V1Namespace;
   menuItem: any[] = [{path: 'home', text: 'Home'}];
   selectedNamespaceName: string;
+
+  kinds = [
+    {route: 'list/pod', kind: 'Pods'},
+    {route: 'list/service', kind: 'Service'},
+    {route: 'list/deployment', kind: 'Deployment'}
+   ];
+
   private mobileQueryListener: () => void;
 
-  // tslint:disable-next-line: max-line-length
-  constructor(changeDetectorRef: ChangeDetectorRef, media: MediaMatcher, private router: Router, private http: HttpClient, private route: ActivatedRoute) {
+  constructor(
+    changeDetectorRef: ChangeDetectorRef,
+    media: MediaMatcher,
+    private router: Router,
+    private route: ActivatedRoute,
+    // tslint:disable-next-line: variable-name
+    private readonly _electronService: ElectronService,
+    // tslint:disable-next-line: variable-name
+    private _navService: NavService
+  ) {
     this.mobileQuery = media.matchMedia('(max-width: 600px)');
     this.mobileQueryListener = () => changeDetectorRef.detectChanges();
     this.mobileQuery.addListener(this.mobileQueryListener);
+
+    this._electronService.ipcRenderer.on('getNamespacesListResponse', (event, arg: V1NamespaceList) => {
+      console.log('getNamespacesListResponse received');
+      this.namespaces = arg.items;
+      this.selectedNamespace = arg.items[0];
+      this._navService.setNamespace(arg.items[0].metadata.name);
+    });
+
+    this._electronService.ipcRenderer.send('getNamespacesListRequest');
   }
 
   ngOnInit()  {
-    this.getNamespaces().subscribe((res: V1NamespaceList) => {
-      this.namespaces = res.items;
-      console.log(this.namespaces);
-      this.selectedNamespace = res.items[0];
-      this.menuItem.push({path: 'pod', text: 'Pods', namespace: this.selectedNamespace.metadata.name});
-    });
+
   }
 
   ngOnDestroy(): void {
     this.mobileQuery.removeListener(this.mobileQueryListener);
   }
 
-  getNamespaces() {
-    return this.http.get('http://localhost:3000/namespace/list').pipe(
-      retry(3), // retry a failed request up to 3 times
-    );
-  }
-
   goBack() {
     this.router.navigate(['./'], { relativeTo: this.route });
   }
 
-  onNamespaceSelect(namespace: V1Namespace) {
+  onNamespaceSelect(namespace: string) {
     console.log(namespace);
-    console.log(this.router.url);
-    const tree: UrlTree = this.router.parseUrl(this.router.url);
-    const g: UrlSegmentGroup = tree.root.children[PRIMARY_OUTLET];
-    const s: UrlSegment[] = g.segments;
-    this.selectedNamespaceName = s[0].path; // returns 'team'
-    // s[0].parameters; // returns {id: 33}
-    const redirectNamespace = this.router.url.replace(this.selectedNamespaceName, namespace.metadata.name);
-    this.router.navigateByUrl(redirectNamespace);
+    this._navService.setNamespace(namespace);
   }
 }

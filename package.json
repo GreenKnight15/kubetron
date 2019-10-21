@@ -4,13 +4,13 @@
   "main": "main.js",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "serve": "ng serve",
+    "build": "ng build --base-href ./src",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "electron-tsc": "tsc src/main.ts && ng build --base-href ./ && electron .",
-    "electron": "ng build --base-href ./src && electron ."
+    "electron-tsc": "tsc src/main.ts && ng build --base-href ./src && electron .",
+    "start": "npm run build && electron ."
   },
   "private": true,
   "dependencies": {
@@ -25,7 +25,10 @@
     "@angular/platform-browser": "~8.2.9",
     "@angular/platform-browser-dynamic": "~8.2.9",
     "@angular/router": "~8.2.9",
+    "@kubernetes/client-node": "^0.11.0",
+    "@types/electron": "^1.6.10",
     "minimatch": "^3.0.4",
+    "ngx-electron": "^2.2.0",
     "os": "^0.1.1",
     "path": "^0.12.7",
     "request": "^2.88.0",
@@ -65,6 +68,6 @@
     "typescript": "~3.5.3"
   },
   "description": "This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 8.3.8.",
-  "author": "",
-  "license": "ISC"
+  "author": "James Ritter",
+  "license": "MIT"
 }

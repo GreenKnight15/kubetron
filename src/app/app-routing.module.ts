@@ -1,12 +1,12 @@
 import { Routes, RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
-import { AppComponent } from './app.component';
-import { PodListComponent } from './PodList/PodList.component';
-import { PodDetailsComponent } from './PodDetails/PodDetails.component';
+import { PodListComponent } from './podList/podList.component';
+import { PodDetailsComponent } from './podDetails/podDetails.component';
 import { NamespaceComponent } from './namespace/namespace.component';
 import { DeploymentListComponent } from './deploymentList/deploymentList.component';
 import { DeploymentDetailComponent } from './deploymentDetail/deploymentDetail.component';
 import { ServiceListComponent } from './serviceList/serviceList.component';
+import { PageNotFoundComponent } from './pageNotFound/pageNotFound.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'default', pathMatch: 'full' },
@@ -19,9 +19,28 @@ const routes: Routes = [
 
 ];
 
+const routes2: Routes = [
+  { path: '', component: PodListComponent },
+  { path: 'list/deployment', component: DeploymentListComponent,
+    children: [
+      { path: ':name', component: DeploymentDetailComponent},
+    ]
+  },
+  { path: 'list/pod', component: PodListComponent,
+    children: [
+      { path: ':uid', component: PodDetailsComponent }
+    ]
+  },
+  { path: 'list/service', children: [
+      { path: '', component: ServiceListComponent }
+    ]
+  },
+  { path: '**', component: PodListComponent }
+];
+
 @NgModule({
   imports: [
-    RouterModule.forRoot(routes, { enableTracing: true })
+    RouterModule.forRoot(routes2, { enableTracing: true })
   ],
   exports: [
     RouterModule
