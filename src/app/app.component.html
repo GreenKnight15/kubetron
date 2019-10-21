@@ -10,9 +10,11 @@
 
       <mat-nav-list>
         <div *ngFor="let nav of menuItem">
-          <a mat-list-item mat-ripple *ngIf="nav.namespace" [routerLink]="nav.namespace/nav.path">{{nav.text}}</a>
-          <a mat-list-item mat-ripple *ngIf="!nav.namespace" [routerLink]="nav.path">{{nav.text}}</a>
+          <a mat-list-item mat-ripple  [routerLink]="nav.path">{{nav.text}}</a>
         </div>
+        <mat-list-item *ngFor="let kind of kinds">
+          <a [routerLink]="[kind.route]"  >{{kind.kind}}</a>
+        </mat-list-item>
       </mat-nav-list>
     </mat-sidenav>
 
@@ -28,8 +30,8 @@
         <span fxFlex></span>
 
         <mat-form-field *ngIf="namespaces" fxLayoutGap="10"  fxLayout="row" fxLayoutAlign="start end">
-          <mat-select [(value)]="selectedNamespace" >
-            <mat-option *ngFor="let ns of namespaces" [value]="ns" [routerLink]="[ns.metadata.name]" routerLinkActive="router-link-active" >
+          <mat-select [(value)]="selectedNamespace" (selectionChange)="onNamespaceSelect($event.value.metadata.name)" >
+            <mat-option *ngFor="let ns of namespaces" [value]="ns"  >
               {{ns.metadata.name}}
             </mat-option>
           </mat-select>

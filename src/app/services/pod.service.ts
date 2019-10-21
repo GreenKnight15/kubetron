@@ -1,18 +1,16 @@
 import { Injectable } from '@angular/core';
-import { ElectronService } from './electron.service';
-import { V1Pod } from '@kubernetes/client-node';
-
+import { ElectronService } from 'ngx-electron';
 import { BehaviorSubject } from 'rxjs';
+import { V1Pod } from '@kubernetes/client-node/dist/gen/model/V1Pod';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PodService {
-
   pods = new BehaviorSubject<V1Pod[]>([]);
-
-  constructor(private readonly _ipc: ElectronService) {
-    this._ipc.on('getPodListResponse', (event, pods: V1Pod[]) => {
+// tslint:disable-next-line: variable-name
+constructor(private _electronService: ElectronService) {
+    this._electronService.ipcRenderer.on('getPodListResponse', (event, pods: V1Pod[]) => {
       console.log('getPodListResponse received');
       this.pods.next(pods);
     });
@@ -20,7 +18,7 @@ export class PodService {
 
   public getGetNamespacedPods(namespace: string) {
     console.log('getPodListRequest sent');
-    this._ipc.send('getPodListRequest', namespace);
+    this._electronService.ipcRenderer.send('getPodListRequest', namespace);
   }
 
 }

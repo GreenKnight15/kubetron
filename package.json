@@ -9,7 +9,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "electron-tsc": "tsc src/main.ts && ng build --base-href ./ && electron .",
+    "electron-tsc": "tsc src/main.ts && ng build --base-href ./src && electron .",
     "start": "npm run build && electron ."
   },
   "private": true,
@@ -28,6 +28,7 @@
     "@kubernetes/client-node": "^0.11.0",
     "@types/electron": "^1.6.10",
     "minimatch": "^3.0.4",
+    "ngx-electron": "^2.2.0",
     "os": "^0.1.1",
     "path": "^0.12.7",
     "request": "^2.88.0",

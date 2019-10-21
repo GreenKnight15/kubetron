@@ -1,34 +1,41 @@
-import { Component, OnInit, Input, OnChanges, OnDestroy, ChangeDetectorRef  } from '@angular/core';
-import { V1Pod } from '@kubernetes/client-node';
-import { Router, ActivatedRoute, UrlTree, UrlSegmentGroup, UrlSegment, PRIMARY_OUTLET } from '@angular/router';
-import { ElectronService } from '../services/electron.service';
+import { Component, OnInit, OnChanges, OnDestroy, ChangeDetectorRef  } from '@angular/core';
+import { V1Pod } from '@kubernetes/client-node/dist/gen/model/V1Pod';
+import { Router, UrlTree, UrlSegmentGroup, UrlSegment, PRIMARY_OUTLET } from '@angular/router';
 import { PodService } from '../services/pod.service';
+import { NavService } from '../services/nav.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-pod-list',
-  templateUrl: './PodList.component.html',
-  styleUrls: ['./PodList.component.css']
+  templateUrl: './podList.component.html',
+  styleUrls: ['./podList.component.css']
 })
 export class PodListComponent implements OnInit, OnChanges, OnDestroy {
 
   selectedNamespace;
   pods: V1Pod[];
   selectedPod: V1Pod;
-  podsSubscription$;
+  podsSubscription$: Subscription;
+  selectedNamespace$: Subscription;
 
   constructor(
     private router: Router,
-    private readonly _ipc: ElectronService,
     private podService: PodService,
-    private cdr: ChangeDetectorRef)
-    {
-      this.setNamespace();
+    private cdr: ChangeDetectorRef,
+    // tslint:disable-next-line: variable-name
+    private readonly _navService: NavService
+    ) {
+      this.selectedNamespace$ = this._navService.selectedNamespace$.subscribe((value) => {
+        this.selectedNamespace = value;
+      });
+      console.log(this.selectedNamespace);
     }
 
   ngOnInit(): void  {
     console.log(this.selectedNamespace);
 
     this.podsSubscription$ = this.podService.pods.subscribe((value) => {
+      console.log('pod list recived');
       this.pods = value;
       this.cdr.detectChanges();
     });
@@ -41,6 +48,7 @@ export class PodListComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.cdr.detach();
+    this.selectedNamespace$.unsubscribe();
     this.podsSubscription$.unsubscribe();
   }
 
@@ -57,7 +65,6 @@ export class PodListComponent implements OnInit, OnChanges, OnDestroy {
     const tree: UrlTree = this.router.parseUrl(this.router.url);
     const g: UrlSegmentGroup = tree.root.children[PRIMARY_OUTLET];
     const s: UrlSegment[] = g.segments;
-    this.selectedNamespace = s[0].path; // returns 'team'
-    // s[0].parameters; // returns {id: 33}
+    this.selectedNamespace = s[0].path;
   }
 }

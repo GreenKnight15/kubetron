@@ -1,20 +1,20 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MaterialModule } from './material-module';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { PodListComponent } from './PodList/PodList.component';
-import { PodDetailsComponent } from './PodDetails/PodDetails.component';
+import { PodListComponent } from './podList/podList.component';
+import { PodDetailsComponent } from './podDetails/podDetails.component';
 import { NamespaceComponent } from './namespace/namespace.component';
 import { DeploymentListComponent } from './deploymentList/deploymentList.component';
 import { DeploymentDetailComponent } from './deploymentDetail/deploymentDetail.component';
 import { ServiceListComponent } from './serviceList/serviceList.component';
-import { ElectronService } from './services/electron.service';
+import { NgxElectronModule } from 'ngx-electron';
+import { PageNotFoundComponent } from './pageNotFound/pageNotFound.component';
 
 @NgModule({
    declarations: [
@@ -24,7 +24,8 @@ import { ElectronService } from './services/electron.service';
       NamespaceComponent,
       DeploymentListComponent,
       DeploymentDetailComponent,
-      ServiceListComponent
+      ServiceListComponent,
+      PageNotFoundComponent
    ],
    imports: [
       AppRoutingModule,
@@ -33,15 +34,12 @@ import { ElectronService } from './services/electron.service';
       FlexLayoutModule,
       BrowserModule,
       RouterModule,
-      HttpClientModule
+      NgxElectronModule
    ],
    entryComponents: [
       AppComponent
    ],
-   providers: [
-      HttpClientModule,
-      ElectronService
-   ],
+   providers: [],
    bootstrap: [
       AppComponent
    ]

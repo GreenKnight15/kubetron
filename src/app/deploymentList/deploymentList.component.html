@@ -1,6 +1,6 @@
-<mat-list >
+<mat-list *ngIf="deployments; else null">
   <mat-list-item *ngFor="let deploy of deployments"  fxFill fxLayout="column" fxLayoutAlign="start none"  fxLayoutGap="10px">
-      <mat-card *ngIf="deployments" fxFill fxFlex>
+      <mat-card *ngIf="deploy" fxFill fxFlex>
 
         <mat-card-header>
           <mat-card-title>
@@ -12,19 +12,21 @@
         </mat-card-header>
 
         <mat-card-content>
-
+          <router-outlet></router-outlet>
         </mat-card-content>
         <mat-card-actions>
-          <a mat-button [routerLink]="[deploy.metadata.name]" routerLinkActive="router-link-active" [state]="deploy" >Details</a>
+          <a mat-button [routerLink]="[deploy.metadata.name]" routerLinkActive="router-link-active" >Details</a>
         </mat-card-actions>
         </mat-card>
   </mat-list-item>
 </mat-list>
 
-<mat-card *ngIf="deployments && deployments.length == 0" fxFill >
+<ng-template #null >
+  <mat-card fxFill >
     <mat-card-header>
       <mat-card-title>
         No deployments found
       </mat-card-title>
     </mat-card-header>
   </mat-card>
+</ng-template>

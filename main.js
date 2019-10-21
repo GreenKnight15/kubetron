@@ -15,10 +15,10 @@ let mainWindow
 app.on('ready', createWindow)
 
 // Get Namespaces List
-ipcMain.on('getNamespaces-req', (event) => {
+ipcMain.on('getNamespacesListRequest', (event) => {
   console.log("Getting namespaces")
   k8sApi.listNamespace(true).then(response => {
-    event.reply('getNamespaces-res', response.body)
+    event.reply('getNamespacesListResponse', response.body)
   });
 });
 
@@ -46,13 +46,27 @@ ipcMain.on('getDeploymentListRequest',(event, ...args) => {
 ipcMain.on('getNamespacedDeploymentByNameRequest',(event, ...args) => {
   console.log('getNamespacedDeploymentByNameRequest received');
 
-  var namespace = args[0]
+  var namespace = args[1]
   console.log(namespace)
   var name = args[0]
   console.log(name)
   console.log("Get deployment " + name +" for namespace " + namespace)
-  k8sBetaApi.readNamespacedDeployment(name, namespace, 'true').then((response) => {
-    event.reply('getNamespacedDeploymentByNameResponse', response.body);
+  try {
+    k8sBetaApi.readNamespacedDeployment(name, namespace, 'true').then((response) => {
+      event.reply('getNamespacedDeploymentByNameResponse', response.body);
+    });
+  } catch(e) {
+    console.log(e.meesgae)
+  }
+});
+
+// Get Service List
+ipcMain.on('getServiceListRequest',(event, ...args) => {
+  console.log('getServiceListRequest received '+args);
+  var namespace = args[0]
+  console.log("Get service list for namespace " + namespace)
+  k8sApi.listNamespacedService(namespace,'true').then((response) => {
+    event.reply('getServiceListResponse', response.body.items);
   });
 });
 
