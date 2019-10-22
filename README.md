@@ -7,21 +7,10 @@ The idea of kubetron is to create a cross platform stand alone k8s dashboard. Th
 
 ## Running Electron
 
-Run `npm run electron` this will build the angualr front end and start the electron app. The node server will start as the electron window spawns. 
-
-This takes time to start since the angular code needs to be transpiled first. When developing start a local sever of the node app and the angualr frontend. This will alow you to develop in the brower with on save updates. When changes are done they will transfer into the electron container seamlessly.
-
-## Node Server
-
-### Local Development
-Run `node server ./server` to start the node server locally. Navigate to `http://localhost:3000/`. this node app is started when the electron app starts. It is the interface with the [kubernetes-client](https://github.com/kubernetes-client/javascript).
+Run `npm run electron:start` this will build the angualr front end and start the electron app.
 
 ## Angular Frontend
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 8.3.8.
-
-### Development server
-
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
 ### Code scaffolding
 

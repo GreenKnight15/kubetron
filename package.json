@@ -9,8 +9,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "electron-tsc": "tsc src/main.ts && ng build --base-href ./src && electron .",
-    "start": "npm run build && electron ."
+    "electron:tsc": "tsc src/main.ts && ng build --base-href ./src && electron .",
+    "electron:start": "npm run build && electron ."
   },
   "private": true,
   "dependencies": {
