@@ -57,7 +57,7 @@ export class PodListComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onSelect(pod: V1Pod): void {
-    // this.router.navigate(['/pod', pod.metadata.uid]);
+    this.router.navigate([pod.metadata.uid]);
     this.selectedPod = pod;
   }
 

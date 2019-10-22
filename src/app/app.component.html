@@ -9,10 +9,7 @@
       </mat-toolbar>
 
       <mat-nav-list>
-        <div *ngFor="let nav of menuItem">
-          <a mat-list-item mat-ripple  [routerLink]="nav.path">{{nav.text}}</a>
-        </div>
-        <mat-list-item *ngFor="let kind of kinds">
+        <mat-list-item mat-button *ngFor="let kind of kinds" [routerLink]="[kind.route]">
           <a [routerLink]="[kind.route]"  >{{kind.kind}}</a>
         </mat-list-item>
       </mat-nav-list>
